@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>분석 결과</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .info {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            margin: 20px 0;
+        }
+
+        .predict-section {
+            margin-top: 30px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 16px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>분석 결과</h1>
+    <div class="info">
+        <p>계절: <span th:text="${season}"></span></p>
+        <p>목표 열 (y축): <span th:text="${targetColumn}"></span></p>
+        <p>특징 열 (x축): <span th:text="${featureColumn}"></span></p>
+        <p>평균제곱오차(MSE): <span th:text="${mse}"></span></p>
+    </div>
+    <canvas id="regressionChart"></canvas>
+
+    <div class="predict-section">
+        <h3>예측</h3>
+        <p><span th:text="${featureColumn}"></span> 값을 입력하면 <span th:text="${targetColumn}"></span> 값을 계산합니다:</p>
+        <input type="number" id="xInput" placeholder="x값 입력" />
+        <button onclick="predictY()">예측</button>
+        <p>예측된 <span th:text="${targetColumn}"></span>값: <span id="predictedY">-</span></p>
+        <p>오차범위(+-): <span id="rmseDisplay">-</span></p>
+    </div>
+
+    <a href="/" class="back-link">다시 분석하기</a>
+</div>
+<script>
+    // 기존 JavaScript 그대로 유지
+    document.addEventListener("DOMContentLoaded", function () {
+        const xData = JSON.parse('[[${xData}]]');
+        const yData = JSON.parse('[[${yData}]]');
+        const slope = parseFloat('[[${slope}]]');
+        const intercept = parseFloat('[[${intercept}]]');
+        const mse = parseFloat('[[${mse}]]');
+        const rmse = Math.sqrt(mse);
+
+        const originalYMin = Math.min(...yData);
+        const originalYMax = Math.max(...yData);
+        const yMax = originalYMax * 1.5;
+        const yMin = originalYMin - (yMax - originalYMax);
+
+        const ctx = document.getElementById('regressionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: '원본 데이터',
+                        data: xData.map((x, i) => ({ x, y: yData[i] })),
+                        backgroundColor: 'blue',
+                    },
+                    {
+                        label: '회귀선',
+                        data: xData.map(x => ({ x, y: slope * x + intercept })),
+                        borderColor: 'red',
+                        type: 'line',
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'x축' } },
+                    y: { title: { display: true, text: 'y축' }, min: yMin, max: yMax },
+                },
+            },
+        });
+
+        window.predictY = function () {
+            const xValue = parseFloat(document.getElementById('xInput').value);
+            if (isNaN(xValue)) {
+                alert("올바른 숫자를 입력하세요!");
+                return;
+            }
+            const yValue = (slope * xValue + intercept).toFixed(2);
+            document.getElementById('predictedY').textContent = yValue;
+            document.getElementById('rmseDisplay').textContent = rmse.toFixed(2);
+        };
+    });
+</script>
+</body>
+</html>

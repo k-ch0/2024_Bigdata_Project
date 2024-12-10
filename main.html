@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 분석</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #555;
+        }
+
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>데이터 분석</h1>
+    <form action="/analyze" method="post">
+        <!-- 계절 선택 -->
+        <label for="season">계절:</label>
+        <select name="season" id="season">
+            <option th:each="season : ${seasons}" th:value="${season}" th:text="${season}"></option>
+        </select>
+
+        <!-- 목표 열 선택 -->
+        <label for="targetColumn">목표 열 (y축):</label>
+        <select name="targetColumn" id="targetColumn">
+            <option th:each="column : ${numericColumns}" th:value="${column}" th:text="${column}"></option>
+        </select>
+
+        <!-- 특징 열 선택 -->
+        <label for="featureColumn">특징 열 (x축):</label>
+        <select name="featureColumn" id="featureColumn">
+            <option th:each="column : ${featureColumns}" th:value="${column}" th:text="${column}"></option>
+        </select>
+
+        <button type="submit">분석</button>
+    </form>
+    <h5>빅데이터DevOps프로젝트 3V</h5>
+</div>
+</body>
+</html>
